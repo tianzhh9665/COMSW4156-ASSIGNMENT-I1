@@ -12,9 +12,9 @@ def init_db():
     conn = None
     try:
         conn = sqlite3.connect('sqlite_db')
-        conn.execute('CREATE TABLE GAME(current_turn TEXT, board TEXT,' +
-                     'winner TEXT, player1 TEXT, player2 TEXT' +
-                     ', remaining_moves INT)')
+        conn.execute('CREATE TABLE GAME(current_turn TEXT, board TEXT,'
+                     + 'winner TEXT, player1 TEXT, player2 TEXT'
+                     + ', remaining_moves INT)')
         print('Database Online, table created')
     except Error as e:
         print(e)
