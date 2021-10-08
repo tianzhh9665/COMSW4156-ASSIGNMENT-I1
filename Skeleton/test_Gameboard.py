@@ -9,6 +9,32 @@ class Test_TestGameboard(unittest.TestCase):
     def tearDown(self):
         self.board = Gameboard()
 
+    def test_get_board_str(self):
+        # checks the function that convert board list to a String representation is working properly.
+        expected = '0 0 0 0 0 0 0,0 0 0 0 0 0 0,0 0 0 0 0 0 0,0 0 0 0 0 0 0,0 0 0 0 0 0 0,0 0 0 0 0 0 0'
+        board_str = self.board.get_board_str()
+        self.assertEqual(board_str, expected, "get_board_str failed")
+
+        self.board.board[1][1] = "red"
+        board_str = self.board.get_board_str()
+        expected = '0 0 0 0 0 0 0,0 red 0 0 0 0 0,0 0 0 0 0 0 0,0 0 0 0 0 0 0,0 0 0 0 0 0 0,0 0 0 0 0 0 0'
+        self.assertEqual(board_str, expected, "get_board_str failed")
+    
+    def test_get_board_from_str(self):
+        # checks the function that convert board String to a list representation is working properly.
+        board_str = '0 0 0 0 0 0 0,0 red 0 0 0 0 0,0 0 0 0 0 0 0,0 0 0 0 0 0 0,0 0 0 0 0 0 0,0 0 0 0 0 0 0'
+        self.board.board[1][1] = "red"
+        board_list = self.board.get_board_from_str(board_str)
+
+        self.assertEqual(self.board.board, board_list, "get_board_from_str failed!")
+
+        board_str = '0 0 0 0 0 0 0,0 red 0 0 0 0 0,yellow 0 0 0 0 0 0,0 0 0 0 0 0 0,0 0 0 0 0 0 0,0 0 0 0 0 0 0'
+        self.board.board[2][0] = "yellow"
+        board_list = self.board.get_board_from_str(board_str)
+
+        self.assertEqual(self.board.board, board_list, "get_board_from_str failed!")
+
+
     def test_set_player1_color(self):
         # checks the function that sets player 1's chosen color is working properly.
         self.board.set_player_1("red")

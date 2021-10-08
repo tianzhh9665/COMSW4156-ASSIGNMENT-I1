@@ -1,8 +1,8 @@
-# from re import match
+from re import match
 from flask import Flask, render_template, request, jsonify
-# from json import dump
+from json import dump
 from Gameboard import Gameboard
-# import db
+import db
 import logging
 
 app = Flask(__name__)
@@ -26,6 +26,13 @@ def player1_connect():
 
     global game
     game = Gameboard()
+
+    db.clear()
+    record = db.getMove()
+    if record is not None:
+        # clear table fails
+        raise Exception("db clear table fails")
+    db.init_db()
 
     return render_template('player1_connect.html', status="Pick a Color.")
 
@@ -55,10 +62,21 @@ Assign player1 their color
 @app.route('/p1Color', methods=['GET'])
 def player1_config():
     try:
-        player1_color = request.args.get('color', '')
-        game.set_player_1(player1_color)
+        saved_state = db.getMove()
+        if saved_state is not None:
+            game.set_player_1(saved_state[3])
+            game.set_player_2(saved_state[4])
+            game.current_turn = saved_state[0]
+            game.game_result = saved_state[2]
+            game.remaining_moves = saved_state[5]
+            game.board = game.get_board_from_str(saved_state[1])
 
-        return render_template('player1_connect.html', status=player1_color)
+            return render_template('player1_connect.html', status=saved_state[3])
+        else:    
+            player1_color = request.args.get('color', '')
+            game.set_player_1(player1_color)
+
+            return render_template('player1_connect.html', status=player1_color)
     except KeyError:
         return render_template('player1_connect.html', status="")
 
@@ -75,6 +93,19 @@ Assign player2 their color
 
 @app.route('/p2Join', methods=['GET'])
 def p2Join():
+    saved_state = db.getMove()
+    if saved_state is not None:
+        game.set_player_1(saved_state[3])
+        game.set_player_2(saved_state[4])
+        game.current_turn = saved_state[0]
+        game.game_result = saved_state[2]
+        game.remaining_moves = saved_state[5]
+        game.board = game.get_board_from_str(saved_state[1])
+
+        return render_template('p2Join.html', status=saved_state[4])
+
+
+
     if game.player1 == 'red':
         game.player2 = 'yellow'
         return render_template('p2Join.html', status=game.player2)
@@ -138,6 +169,9 @@ def p1_move():
         game.change_turn()
         game.decrease_remaining_moves()
 
+        pending_save_move = (game.current_turn,game.get_board_str(),game.game_result,game.player1,game.player2,game.remaining_moves)
+        print(pending_save_move)
+        db.add_move(pending_save_move)
         return jsonify(move=game.board, invalid=False, winner=game.game_result)
 
 
@@ -180,6 +214,10 @@ def p2_move():
         game.determine_winner()
         game.change_turn()
         game.decrease_remaining_moves()
+
+        pending_save_move = (game.current_turn,game.get_board_str(),game.game_result,game.player1,game.player2,game.remaining_moves)
+
+        db.add_move(pending_save_move)
 
         return jsonify(move=game.board, invalid=False, winner=game.game_result)
 

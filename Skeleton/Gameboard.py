@@ -1,4 +1,4 @@
-# import db
+import db
 
 class Gameboard():
     def __init__(self):
@@ -8,6 +8,31 @@ class Gameboard():
         self.game_result = ""
         self.current_turn = 'p1'
         self.remaining_moves = 42
+
+    def get_board_str(self):
+        result = ""
+        for row in range(6):
+            for col in range(7):
+                if col == 6:
+                    if(row == 5):
+                        result += str(self.board[row][col])
+                    else:
+                        result += str(self.board[row][col]) + ","
+                else:
+                    result += str(self.board[row][col]) + " "
+        
+        return result
+    
+    def get_board_from_str(self,board_str):
+        rows = []
+        for row_str in board_str.split(","):
+            row_list = row_str.split(" ")
+            for i in range(len(row_list)):
+                if row_list[i] == '0':
+                    row_list[i] = 0
+            rows.append(row_list)
+        
+        return rows
 
     def set_player_1(self, color):
         self.player1 = color
